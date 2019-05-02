@@ -1,0 +1,74 @@
+extends ../layout
+
+block content
+  h1= title
+  ul
+    each val,index in data.data.user
+      li= val + index
+  form(action='#', method='POST', id="menu")
+    input(type="hidden" name="id" value=data.menu[0].id)
+    input(type="hidden" name="userId" value=data.data.user.id)
+    br
+    label(for='menu') Menu:
+    i="(Must be a html content)"
+    br
+    textarea(name="menu", cols="100", rows="25")=data.menu[0].body
+    br
+    input(type='submit', value='Submit')
+    div(class="menu-message")
+
+  form(action='#', method='POST', id="content")
+    input(type="hidden" name="widgetId" value=data.home[0].uuid)
+    input(type="hidden" name="templateId" value=data.home[0].widget_template.uuid)
+    input(type="hidden" name="userId" value=data.data.user.id)
+    br
+    label(for='content') Content:
+    i="(Must be a json array)"
+    br
+    textarea(name="content", cols="100", rows="25")=JSON.stringify(data.home[0].widget_configuration.images, null, 2)
+    br
+    input(type='submit', value='Submit')
+    div(class="content-message")
+
+  script.
+      $(document).ready(function(){
+        $('#menu').on('submit',(e) => {
+          e.preventDefault();
+          $.ajax({
+            type: "POST",
+            url: "/page",
+            data: $('#menu').serialize(),
+            success: function(e){
+              if(e.status){
+                $(".menu-message").html("<div style='color: green'>Menu has been saved</div>")
+              }else{
+                $(".menu-message").html("<div style='color: red'>Menu has not been saved</div>")
+              }
+            },
+            error: function(){
+               $(".menu-message").html("<div style='color: red'>Menu has not been saved</div>")
+            },
+            dataType: 'json'
+          });
+        })
+        //Content
+        $('#content').on('submit',(e) => {
+          e.preventDefault();
+          $.ajax({
+            type: "POST",
+            url: "/content",
+            data: $('#content').serialize(),
+            success: function(e){
+              if(e.status){
+                $(".content-message").html("<div style='color: green'>Home content has been saved</div>")
+              }else{
+                $(".content-message").html("<div style='color: red'>Home content has not been saved</div>")
+              }
+            },
+            error: function(e){
+              $(".content-message").html("<div style='color: red'>Home content has not been saved</div>")
+            },
+            dataType: 'json'
+          });
+        })
+      });
